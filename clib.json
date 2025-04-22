@@ -1,6 +1,6 @@
 {
   "name": "simde_sse2",
-  "version": "main",
+  "version": "v0.8.2",
   "repo": "goodcleanfun/simde_sse2",
   "description": "A clib pointer to SIMDe including SSE2 instructions only",
   "keywords": [
@@ -14,5 +14,21 @@
     "silentbicycle/greatest": "*"
   },
   "src": [
+    "check.h",
+    "debug-trap.h",
+    "hedley.h",
+    "simde-align.h",
+    "simde-arch.h",
+    "simde-common.h",
+    "simde-constify.h",
+    "simde-detect-clang.h",
+    "simde-diagnostic.h",
+    "simde-f16.h",
+    "simde-features.h",
+    "simde-math.h",
+    "mmx.h",
+    "sse.h",
+    "sse2.h",
+    ""
   ]
 }
