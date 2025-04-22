@@ -11,7 +11,8 @@
   ],
   "license": "MIT",
   "development": {
-    "silentbicycle/greatest": "*"
+    "silentbicycle/greatest": "*",
+    "goodcleanfun/aligned": "*"
   },
   "src": [
     "check.h",
