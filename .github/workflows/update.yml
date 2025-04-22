@@ -1,0 +1,109 @@
+name: Check SIMDe headers and update clib.json
+
+on:
+  schedule:
+    - cron: "15 2 * * *" # Runs nightly
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+    outputs:
+      should_update: ${{ steps.version_check.outputs.should_update }}
+      latest_release: ${{ steps.get_latest_release.outputs.latest_release }}
+    steps:
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout the clib repository
+        uses: actions/checkout@v4
+
+      - name: Clone SIMDe headers
+        run: |
+          git clone --depth 1 https://github.com/goodcleanfun/simde_headers.git simde_headers
+
+      - name: Get latest SIMDe release version
+        id: get_latest_release
+        run: |
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/simd-everywhere/simde-no-tests/releases/latest --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --header 'Content-Type: application/json' | jq -r '.tag_name')
+          echo "latest_release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
+
+      - name: Check current version
+        id: version_check
+        run: |
+          CURRENT_VERSION=$(jq -r ".version" clib.json)
+          if [ "$CURRENT_VERSION" != "${{ steps.get_latest_release.outputs.latest_release }}" ]; then
+            echo "Current version ($CURRENT_VERSION) is different from latest release (${{ steps.get_latest_release.outputs.latest_release }}), proceeding with update"
+            echo "should_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "Versions match, no update needed"
+            echo "should_update=false" >> $GITHUB_OUTPUT
+          fi
+
+  update_headers:
+    needs: check_version
+    if: needs.check_version.outputs.should_update == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout the clib repository
+        uses: actions/checkout@v4
+
+      - name: Clone SIMDe headers
+        run: |
+          git clone --depth 1 https://github.com/goodcleanfun/simde_headers.git simde_headers
+
+      - name: Clone the SIMDe repository
+        run: |
+          git clone --depth 1 https://github.com/simd-everywhere/simde-no-tests.git --branch=${{ needs.check_version.outputs.latest_release }} simde-repo
+
+      - name: Generate list of .h files
+        id: generate_files
+        run: |
+          FILE_LIST=$(python3 simde_headers/simde_headers.py simde-repo simde/x86/sse2.h | sort | tr '\n' ' ' | sed 's/[ ]+$//g')
+          echo "file_list=$FILE_LIST" >> $GITHUB_OUTPUT
+    
+      - name: Copy header files
+        run: |
+          python3 headers/simde_rewrite_includes.py simde_sse2 simde-repo $(echo "${{ steps.generate_files.outputs.file_list }}") --out-dir=.
+
+      - name: Update clib.json
+        run: |
+          FILES_CSV=$(echo "${{ steps.generate_files.outputs.file_list }}" | sed -E 's/[^ ]+\///g' | sed -E 's/[[:space:]]/","/g')
+          jq ".src = [\"$FILES_CSV\"]" clib.json > clib.json.tmp
+          mv clib.json.tmp clib.json
+          jq ".version = \"${{ needs.check_version.outputs.latest_release }}\"" clib.json > clib.json.tmp
+          mv clib.json.tmp clib.json
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          if [ "$(git diff --name-only HEAD)" ]; then
+            timestamp=$(date -u)
+            git add clib.json *.h
+            git commit -a -m "Update clib.json with latest SIMDe headers [${timestamp}]" || exit 0
+            git tag -a "${{ needs.check_version.outputs.latest_release }}" -m "Release ${{ needs.check_version.outputs.latest_release }}"
+            git push
+            git push --tags
+            echo "created_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes to commit."
+            echo "created_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create release
+        if: steps.check_changes.outputs.created_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ needs.check_version.outputs.latest_release }}" --generate-notes
