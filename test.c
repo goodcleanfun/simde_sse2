@@ -26,7 +26,7 @@ static inline void remez9_0_log2_sse(double *values, size_t num)
     CONST_128D(w2, 0.49999999974109940909767965915362308135415179642286);
     CONST_128D(w1, 1.0000000000054730504284163017295863259125942049362);
     CONST_128D(w0, 0.99999999999998091336479463057053516986466888462081);
-    const __m128i offset = _mm_setr_epi32(1023, 1023, 0, 0);
+    const simde__m128i offset = simde_mm_setr_epi32(1023, 1023, 0, 0);
 
     for (i = 0;i < num;i += 4) {
         simde__m128i k1, k2;
