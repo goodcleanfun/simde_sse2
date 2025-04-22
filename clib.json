@@ -1,0 +1,18 @@
+{
+  "name": "simde_sse2",
+  "version": "main",
+  "repo": "goodcleanfun/simde_sse2",
+  "description": "A clib pointer to SIMDe including SSE2 instructions only",
+  "keywords": [
+    "simde",
+    "simd",
+    "vectorization",
+    "sse2"
+  ],
+  "license": "MIT",
+  "development": {
+    "silentbicycle/greatest": "*"
+  },
+  "src": [
+  ]
+}
