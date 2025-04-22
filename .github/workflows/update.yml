@@ -68,7 +68,7 @@ jobs:
       - name: Generate list of .h files
         id: generate_files
         run: |
-          FILE_LIST=$(python3 simde_headers/simde_headers.py simde-repo simde/x86/sse2.h | sort | tr '\n' ' ' | sed 's/[ ]+$//g')
+          FILE_LIST=$(python3 simde_headers/simde_headers.py simde-repo x86/sse2.h | sort | tr '\n' ' ' | sed 's/[ ]+$//g')
           echo "file_list=$FILE_LIST" >> $GITHUB_OUTPUT
     
       - name: Copy header files
