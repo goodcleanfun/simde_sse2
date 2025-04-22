@@ -70,7 +70,7 @@ jobs:
           mkdir -p deps\greatest
           curl -L https://github.com/silentbicycle/greatest/raw/release/greatest.h -o deps\greatest\greatest.h
           mkdir -p deps\aligned
-          curl -L https://github.com/goodcleanfun/aligned/raw/main/aligned.h -o deps\aligned\aligned.h
+          curl -L https://raw.githubusercontent.com/goodcleanfun/aligned/refs/heads/main/src/aligned.h -o deps\aligned\aligned.h
       - name: Run tests with MSVC
         run: make CC=cl CFLAGS="/std:c11" test
 
@@ -92,7 +92,7 @@ jobs:
           mkdir -p deps/greatest
           curl -L https://github.com/silentbicycle/greatest/raw/release/greatest.h -o deps/greatest/greatest.h
           mkdir -p deps/aligned
-          curl -L https://github.com/goodcleanfun/aligned/raw/main/aligned.h -o deps/aligned/aligned.h
+          curl -L https://raw.githubusercontent.com/goodcleanfun/aligned/refs/heads/main/src/aligned.h -o deps/aligned/aligned.h
       - name: Build and Test with MinGW
         run: |
           make CC=gcc CFLAGS="-std=c11" test
