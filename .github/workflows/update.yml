@@ -73,7 +73,7 @@ jobs:
     
       - name: Copy header files
         run: |
-          python3 headers/simde_rewrite_includes.py simde_sse2 simde-repo $(echo "${{ steps.generate_files.outputs.file_list }}") --out-dir=.
+          python3 simde_headers/simde_rewrite_includes.py simde_sse2 simde-repo $(echo "${{ steps.generate_files.outputs.file_list }}") --out-dir=.
 
       - name: Update clib.json
         run: |
