@@ -133,8 +133,8 @@ static inline void remez9_0_log2_sse(double *values, size_t num)
         k2 = simde_mm_add_epi32(k2, offset);
         k1 = simde_mm_slli_epi32(k1, 20);
         k2 = simde_mm_slli_epi32(k2, 20);
-        k1 = simde_mm_shuffle_epi32(k1, _MM_SHUFFLE(1,3,0,2));
-        k2 = simde_mm_shuffle_epi32(k2, _MM_SHUFFLE(1,3,0,2));
+        k1 = simde_mm_shuffle_epi32(k1, SIMDE_MM_SHUFFLE(1,3,0,2));
+        k2 = simde_mm_shuffle_epi32(k2, SIMDE_MM_SHUFFLE(1,3,0,2));
         p1 = simde_mm_castsi128_pd(k1);
         p2 = simde_mm_castsi128_pd(k2);
 
